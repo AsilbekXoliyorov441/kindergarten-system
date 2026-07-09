@@ -1,0 +1,64 @@
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
+import { ROUTES } from '@/shared/config/constants'
+import { RequireAuth } from '@/app/router/RequireAuth'
+import { RequireTeacher } from '@/app/router/RequireTeacher'
+import { HomeRoute } from '@/app/router/HomeRoute'
+import { AppLayout } from '@/app/layout/AppLayout'
+import { LoginPage } from '@/pages/LoginPage/LoginPage'
+import { GroupsPage } from '@/pages/GroupsPage/GroupsPage'
+import { GroupDetailPage } from '@/pages/GroupDetailPage/GroupDetailPage'
+import { StudentProfilePage } from '@/pages/StudentProfilePage/StudentProfilePage'
+import { CoinMarketPage } from '@/pages/CoinMarketPage/CoinMarketPage'
+import { LeaderboardPage } from '@/pages/LeaderboardPage/LeaderboardPage'
+import { SettingsPage } from '@/pages/SettingsPage/SettingsPage'
+import { NotFoundPage } from '@/pages/NotFoundPage/NotFoundPage'
+
+export function AppRouter() {
+  const location = useLocation()
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+        <Route
+          element={
+            <RequireAuth>
+              <AppLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<HomeRoute />} />
+          <Route
+            path="guruhlar"
+            element={
+              <RequireTeacher>
+                <GroupsPage />
+              </RequireTeacher>
+            }
+          />
+          <Route
+            path="guruhlar/:groupId"
+            element={
+              <RequireTeacher>
+                <GroupDetailPage />
+              </RequireTeacher>
+            }
+          />
+          <Route path="oquvchi/:studentId" element={<StudentProfilePage />} />
+          <Route path="coin-market" element={<CoinMarketPage />} />
+          <Route path="reyting" element={<LeaderboardPage />} />
+          <Route
+            path="sozlamalar"
+            element={
+              <RequireTeacher>
+                <SettingsPage />
+              </RequireTeacher>
+            }
+          />
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </AnimatePresence>
+  )
+}
