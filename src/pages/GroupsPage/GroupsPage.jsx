@@ -7,6 +7,7 @@ import { EmptyState } from '@/shared/ui/empty-state'
 import { Badge } from '@/shared/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { CreateGroupDialog } from '@/features/create-group/ui/CreateGroupDialog'
+import { RenameGroupDialog } from '@/features/rename-group/ui/RenameGroupDialog'
 import { DeleteGroupDialog } from '@/features/remove-group/ui/DeleteGroupDialog'
 import { useGroupStore } from '@/entities/group/model/store'
 import { useStudentStore } from '@/entities/student/model/store'
@@ -79,7 +80,7 @@ export function GroupsPage() {
                 <Link to={ROUTES.groupDetail(group.id)}>
                   <Card className="h-full">
                     <CardContent className="space-y-4 p-5">
-                      <div className="flex items-center gap-3 pr-8">
+                      <div className="flex items-center gap-3 pr-16">
                         <div className="flex size-11 items-center justify-center rounded-2xl bg-secondary text-primary">
                           <Users2 className="size-5" />
                         </div>
@@ -110,7 +111,8 @@ export function GroupsPage() {
                     </CardContent>
                   </Card>
                 </Link>
-                <div className="absolute right-3 top-3">
+                <div className="absolute right-3 top-3 flex items-center gap-1">
+                  <RenameGroupDialog group={group} />
                   <DeleteGroupDialog group={group} />
                 </div>
               </motion.div>
