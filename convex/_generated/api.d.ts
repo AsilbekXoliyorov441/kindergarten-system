@@ -19,6 +19,7 @@ import type * as lib_authz from "../lib/authz.js";
 import type * as lib_passwords from "../lib/passwords.js";
 import type * as lib_scoping from "../lib/scoping.js";
 import type * as migrations from "../migrations.js";
+import type * as seedDemoActions from "../seedDemoActions.js";
 import type * as students from "../students.js";
 import type * as studentsActions from "../studentsActions.js";
 import type * as teachers from "../teachers.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   "lib/passwords": typeof lib_passwords;
   "lib/scoping": typeof lib_scoping;
   migrations: typeof migrations;
+  seedDemoActions: typeof seedDemoActions;
   students: typeof students;
   studentsActions: typeof studentsActions;
   teachers: typeof teachers;
