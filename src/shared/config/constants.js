@@ -18,6 +18,11 @@ export const LESSONS_PER_MONTH = 12
  * teacher finance dashboard. */
 export const COIN_TO_SOM_RATE = 130
 
+/** Product policy cap: the maximum so'm value one student can accumulate over the
+ * 12-month program. Used on the superadmin dashboard to flag teachers/groups whose
+ * average per-student value is approaching or exceeding this ceiling. */
+export const MAX_STUDENT_VALUE_SOM = 330000
+
 export const TRANSACTION_TYPES = {
   COIN_GIVEN: 'coin_given',
   GIFT_REDEEMED: 'gift_redeemed',
@@ -40,4 +45,5 @@ export const ROUTES = {
   LEADERBOARD: '/reyting',
   SETTINGS: '/sozlamalar',
   TEACHERS_DASHBOARD: '/teachers-dashboard',
+  TEACHERS_MANAGEMENT: '/ustozlar',
 }

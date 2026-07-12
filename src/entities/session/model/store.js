@@ -27,6 +27,7 @@ export const useAuthStore = create((set, get) => ({
   userId: null,
   fullName: null,
   username: null,
+  isSuperAdmin: false,
   hydrated: false,
 
   async hydrate() {
@@ -41,14 +42,29 @@ export const useAuthStore = create((set, get) => ({
       set({ hydrated: true })
       return
     }
-    set({ token, role: who.role, userId: who.userId, fullName: who.fullName, username: who.username ?? null, hydrated: true })
+    set({
+      token,
+      role: who.role,
+      userId: who.userId,
+      fullName: who.fullName,
+      username: who.username ?? null,
+      isSuperAdmin: !!who.isSuperAdmin,
+      hydrated: true,
+    })
   },
 
   async loginTeacher(username, password) {
     const result = await convexClient.action(api.authActions.loginTeacher, { username, password })
     if (!result.ok) return { ok: false, error: result.error }
     writeToken(result.token)
-    set({ token: result.token, role: result.role, userId: result.userId, fullName: result.fullName, username: result.username })
+    set({
+      token: result.token,
+      role: result.role,
+      userId: result.userId,
+      fullName: result.fullName,
+      username: result.username,
+      isSuperAdmin: !!result.isSuperAdmin,
+    })
     return { ok: true }
   },
 
@@ -56,14 +72,14 @@ export const useAuthStore = create((set, get) => ({
     const result = await convexClient.action(api.authActions.loginStudent, { login, password })
     if (!result.ok) return { ok: false, error: result.error }
     writeToken(result.token)
-    set({ token: result.token, role: result.role, userId: result.userId, fullName: result.fullName })
+    set({ token: result.token, role: result.role, userId: result.userId, fullName: result.fullName, isSuperAdmin: false })
     return { ok: true }
   },
 
   logout() {
     const token = get().token
     writeToken(null)
-    set({ token: null, role: null, userId: null, fullName: null, username: null })
+    set({ token: null, role: null, userId: null, fullName: null, username: null, isSuperAdmin: false })
     if (token) convexClient.mutation(api.auth.logout, { token }).catch(() => {})
   },
 

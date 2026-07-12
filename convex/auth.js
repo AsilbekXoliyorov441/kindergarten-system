@@ -1,6 +1,7 @@
 import { query, mutation, internalQuery, internalMutation } from './_generated/server'
 import { v } from 'convex/values'
 import { resolveSession, requireTeacher } from './lib/authz'
+import { requireSuperAdmin } from './lib/scoping'
 
 export const getTeacherByUsername = internalQuery({
   args: { username: v.string() },
@@ -13,7 +14,12 @@ export const getTeacherByUsername = internalQuery({
 })
 
 export const insertTeacher = internalMutation({
-  args: { username: v.string(), passwordHash: v.string(), fullName: v.string() },
+  args: {
+    username: v.string(),
+    passwordHash: v.string(),
+    fullName: v.string(),
+    isSuperAdmin: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
     return await ctx.db.insert('teachers', args)
   },
@@ -38,6 +44,14 @@ export const requireTeacherToken = internalQuery({
   },
 })
 
+/** Used from Node actions (which have no `ctx.db`) to enforce the superadmin role. */
+export const requireSuperAdminToken = internalQuery({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    await requireSuperAdmin(ctx, token)
+  },
+})
+
 export const logout = mutation({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
@@ -55,7 +69,13 @@ export const whoAmI = query({
     if (session.role === 'teacher') {
       const teacher = await ctx.db.get(session.userId)
       if (!teacher) return null
-      return { role: 'teacher', userId: session.userId, fullName: teacher.fullName, username: teacher.username }
+      return {
+        role: 'teacher',
+        userId: session.userId,
+        fullName: teacher.fullName,
+        username: teacher.username,
+        isSuperAdmin: !!teacher.isSuperAdmin,
+      }
     }
 
     const student = await ctx.db.get(session.userId)

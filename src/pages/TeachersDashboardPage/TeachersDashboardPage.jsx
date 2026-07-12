@@ -13,7 +13,19 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts'
-import { TrendingUp, TrendingDown, Scale, BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon } from 'lucide-react'
+import {
+  TrendingUp,
+  TrendingDown,
+  Scale,
+  BarChart3,
+  PieChart as PieChartIcon,
+  LineChart as LineChartIcon,
+  ShieldCheck,
+  Users,
+  Users2,
+  GraduationCap,
+  Coins,
+} from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
@@ -22,10 +34,15 @@ import { AnimatedNumber } from '@/shared/ui/animated-number'
 import { ChartTooltip } from '@/shared/ui/chart-tooltip'
 import { ChartLegend } from '@/shared/ui/chart-legend'
 import { EmptyState } from '@/shared/ui/empty-state'
+import { Meter } from '@/shared/ui/meter'
 import { cn } from '@/shared/lib/utils'
+import { useAuthStore } from '@/entities/session/model/store'
 import { useTransactionStore } from '@/entities/transaction/model/store'
-import { getFinanceOverview, getFinanceTrend } from '@/shared/lib/stats'
-import { COIN_TO_SOM_RATE } from '@/shared/config/constants'
+import { useGroupStore } from '@/entities/group/model/store'
+import { useStudentStore } from '@/entities/student/model/store'
+import { useTeacherStore } from '@/entities/teacher/model/store'
+import { getFinanceOverview, getFinanceTrend, getSuperAdminOverview, getTeacherComparison } from '@/shared/lib/stats'
+import { COIN_TO_SOM_RATE, MAX_STUDENT_VALUE_SOM } from '@/shared/config/constants'
 
 const GRANULARITY_OPTIONS = [
   { value: 'day', label: 'Kunlik' },
@@ -66,6 +83,17 @@ function MoneyCard({ icon: Icon, label, value, hint, accent, index }) {
   )
 }
 
+function AdminStatTile({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-xl bg-muted/60 p-3.5">
+      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Icon className="size-3.5" /> {label}
+      </p>
+      <p className="mt-1 text-lg font-bold text-foreground">{value}</p>
+    </div>
+  )
+}
+
 const PERIOD_ROWS = [
   { key: 'today', label: 'Bugun' },
   { key: 'thisWeek', label: 'Bu hafta' },
@@ -74,8 +102,19 @@ const PERIOD_ROWS = [
 ]
 
 export function TeachersDashboardPage() {
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin)
   const transactions = useTransactionStore((s) => s.items)
+  const groups = useGroupStore((s) => s.items)
+  const students = useStudentStore((s) => s.items)
+  const teachers = useTeacherStore((s) => s.items)
   const finance = getFinanceOverview(transactions, COIN_TO_SOM_RATE)
+
+  const adminOverview = isSuperAdmin
+    ? getSuperAdminOverview({ teachers, groups, students, transactions }, COIN_TO_SOM_RATE, MAX_STUDENT_VALUE_SOM)
+    : null
+  const teacherComparison = isSuperAdmin
+    ? getTeacherComparison({ teachers, groups, students, transactions }, COIN_TO_SOM_RATE, MAX_STUDENT_VALUE_SOM)
+    : []
 
   const [granularity, setGranularity] = useState('day')
   const trendData = getFinanceTrend(transactions, COIN_TO_SOM_RATE, granularity)
@@ -103,6 +142,69 @@ export function TeachersDashboardPage() {
         </div>
         <Badge variant="coin">1 coin = {finance.rate} so'm</Badge>
       </div>
+
+      {isSuperAdmin && adminOverview && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldCheck className="size-4 text-primary" /> Superadmin — umumiy statistika
+            </CardTitle>
+            <CardDescription>Barcha ustozlar va guruhlar bo'yicha o'rtacha ko'rsatkichlar</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5 pt-0">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <AdminStatTile icon={Users} label="Ustozlar" value={adminOverview.teacherCount} />
+              <AdminStatTile icon={Users2} label="Guruhlar" value={adminOverview.groupCount} />
+              <AdminStatTile icon={GraduationCap} label="Faol o'quvchilar" value={adminOverview.studentCount} />
+              <AdminStatTile icon={Coins} label="O'rtacha coin/o'quvchi" value={`${Math.round(adminOverview.avgCoinsPerStudent)} coin`} />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="rounded-xl bg-muted/60 p-4">
+                <p className="text-xs text-muted-foreground">O'rtacha pul / o'quvchi</p>
+                <p className="mt-1 text-xl font-bold text-foreground">{somFormatter(adminOverview.avgMoneyPerStudent)}</p>
+              </div>
+              <div className="rounded-xl bg-muted/60 p-4">
+                <Meter
+                  percent={adminOverview.capUsagePercent}
+                  label={`Limitdan foydalanish (maks. ${somFormatter(MAX_STUDENT_VALUE_SOM)}/o'quvchi)`}
+                />
+              </div>
+            </div>
+
+            {teacherComparison.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px] text-sm">
+                  <thead>
+                    <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
+                      <th className="py-2.5 font-medium">Ustoz</th>
+                      <th className="py-2.5 font-medium">Guruhlar</th>
+                      <th className="py-2.5 font-medium">O'quvchilar</th>
+                      <th className="py-2.5 font-medium">O'rtacha coin</th>
+                      <th className="py-2.5 font-medium">O'rtacha pul</th>
+                      <th className="py-2.5 font-medium">Limitdan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teacherComparison.map((t) => (
+                      <tr key={t.teacherId} className="border-b border-border/40 last:border-0">
+                        <td className="py-3 font-medium text-foreground">{t.fullName}</td>
+                        <td className="py-3 text-muted-foreground">{t.groupCount}</td>
+                        <td className="py-3 text-muted-foreground">{t.studentCount}</td>
+                        <td className="py-3 text-muted-foreground">{Math.round(t.avgCoinsPerStudent)} coin</td>
+                        <td className="py-3 text-foreground">{somFormatter(t.avgMoneyPerStudent)}</td>
+                        <td className="py-3">
+                          <Meter percent={t.capUsagePercent} className="w-32" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <MoneyCard

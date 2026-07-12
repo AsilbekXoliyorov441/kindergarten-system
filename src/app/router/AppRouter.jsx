@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { ROUTES } from '@/shared/config/constants'
 import { RequireAuth } from '@/app/router/RequireAuth'
 import { RequireTeacher } from '@/app/router/RequireTeacher'
+import { RequireSuperAdmin } from '@/app/router/RequireSuperAdmin'
 import { HomeRoute } from '@/app/router/HomeRoute'
 import { AppLayout } from '@/app/layout/AppLayout'
 import { LoginPage } from '@/pages/LoginPage/LoginPage'
@@ -13,6 +14,7 @@ import { CoinMarketPage } from '@/pages/CoinMarketPage/CoinMarketPage'
 import { LeaderboardPage } from '@/pages/LeaderboardPage/LeaderboardPage'
 import { SettingsPage } from '@/pages/SettingsPage/SettingsPage'
 import { TeachersDashboardPage } from '@/pages/TeachersDashboardPage/TeachersDashboardPage'
+import { TeachersManagementPage } from '@/pages/TeachersManagementPage/TeachersManagementPage'
 import { NotFoundPage } from '@/pages/NotFoundPage/NotFoundPage'
 
 export function AppRouter() {
@@ -63,6 +65,14 @@ export function AppRouter() {
               <RequireTeacher>
                 <TeachersDashboardPage />
               </RequireTeacher>
+            }
+          />
+          <Route
+            path="ustozlar"
+            element={
+              <RequireSuperAdmin>
+                <TeachersManagementPage />
+              </RequireSuperAdmin>
             }
           />
         </Route>

@@ -6,6 +6,7 @@ export default defineSchema({
     username: v.string(),
     passwordHash: v.string(),
     fullName: v.string(),
+    isSuperAdmin: v.optional(v.boolean()),
   }).index('by_username', ['username']),
 
   students: defineTable({
@@ -23,7 +24,8 @@ export default defineSchema({
   groups: defineTable({
     name: v.string(),
     createdAt: v.string(),
-  }),
+    teacherId: v.optional(v.id('teachers')),
+  }).index('by_teacher', ['teacherId']),
 
   lessons: defineTable({
     groupId: v.id('groups'),

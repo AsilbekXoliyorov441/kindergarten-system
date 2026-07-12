@@ -17,8 +17,12 @@ import type * as groups from "../groups.js";
 import type * as lessons from "../lessons.js";
 import type * as lib_authz from "../lib/authz.js";
 import type * as lib_passwords from "../lib/passwords.js";
+import type * as lib_scoping from "../lib/scoping.js";
+import type * as migrations from "../migrations.js";
 import type * as students from "../students.js";
 import type * as studentsActions from "../studentsActions.js";
+import type * as teachers from "../teachers.js";
+import type * as teachersActions from "../teachersActions.js";
 import type * as transactions from "../transactions.js";
 
 import type {
@@ -37,8 +41,12 @@ declare const fullApi: ApiFromModules<{
   lessons: typeof lessons;
   "lib/authz": typeof lib_authz;
   "lib/passwords": typeof lib_passwords;
+  "lib/scoping": typeof lib_scoping;
+  migrations: typeof migrations;
   students: typeof students;
   studentsActions: typeof studentsActions;
+  teachers: typeof teachers;
+  teachersActions: typeof teachersActions;
   transactions: typeof transactions;
 }>;
 

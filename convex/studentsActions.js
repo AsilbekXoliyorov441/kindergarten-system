@@ -12,7 +12,7 @@ import { generateStudentLogin } from '../src/shared/lib/credentials'
 export const create = action({
   args: { token: v.string(), groupId: v.id('groups'), fullName: v.string() },
   handler: async (ctx, { token, groupId, fullName }) => {
-    await ctx.runQuery(internal.auth.requireTeacherToken, { token })
+    await ctx.runQuery(internal.groups.requireGroupOwnerToken, { token, groupId })
 
     const existingLogins = await ctx.runQuery(internal.students.listLogins, {})
     const login = generateStudentLogin(fullName, existingLogins)

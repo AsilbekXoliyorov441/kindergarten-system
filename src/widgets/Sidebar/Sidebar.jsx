@@ -7,7 +7,8 @@ import { NAV_ITEMS } from '@/widgets/Sidebar/navItems'
 
 export function Sidebar() {
   const role = useAuthStore((s) => s.role)
-  const items = NAV_ITEMS.filter((item) => item.roles.includes(role))
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin)
+  const items = NAV_ITEMS.filter((item) => item.roles.includes(role) && (!item.superAdminOnly || isSuperAdmin))
 
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border/60 bg-card/40 backdrop-blur-xl lg:flex">

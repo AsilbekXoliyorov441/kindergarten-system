@@ -1,8 +1,12 @@
 import { query } from './_generated/server'
+import { v } from 'convex/values'
+import { getScopedStudentIdSet } from './lib/scoping'
 
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query('coinEntries').collect()
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const studentIdSet = await getScopedStudentIdSet(ctx, token)
+    const entries = await ctx.db.query('coinEntries').collect()
+    return studentIdSet === null ? entries : entries.filter((e) => studentIdSet.has(e.studentId))
   },
 })

@@ -5,7 +5,7 @@ import { mapId } from '@/shared/lib/convex/mapId'
 
 export function useGroupStore(selector) {
   const token = useAuthStore((s) => s.token)
-  const items = (useQuery(api.groups.list) ?? []).map(mapId)
+  const items = (useQuery(api.groups.list, token ? { token } : 'skip') ?? []).map(mapId)
   const createMutation = useMutation(api.groups.create)
   const removeMutation = useMutation(api.groups.remove)
 

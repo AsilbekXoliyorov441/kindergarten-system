@@ -8,7 +8,7 @@ export function useStudentStore(selector) {
   const token = useAuthStore((s) => s.token)
   const role = useAuthStore((s) => s.role)
 
-  const publicItems = useQuery(api.students.list)
+  const publicItems = useQuery(api.students.list, role === ROLES.STUDENT && token ? { token } : 'skip')
   const teacherItems = useQuery(api.students.listForTeacher, role === ROLES.TEACHER && token ? { token } : 'skip')
   const items = (teacherItems ?? publicItems ?? []).map(mapId)
 

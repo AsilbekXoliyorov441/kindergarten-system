@@ -1,11 +1,13 @@
 import { query, mutation } from './_generated/server'
 import { v, ConvexError } from 'convex/values'
-import { requireTeacher } from './lib/authz'
+import { getScopedStudentIdSet, requireStudentOwner } from './lib/scoping'
 
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query('transactions').collect()
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const studentIdSet = await getScopedStudentIdSet(ctx, token)
+    const transactions = await ctx.db.query('transactions').collect()
+    return studentIdSet === null ? transactions : transactions.filter((t) => studentIdSet.has(t.studentId))
   },
 })
 
@@ -14,7 +16,7 @@ export const list = query({
 export const redeemGift = mutation({
   args: { token: v.string(), studentId: v.id('students'), giftId: v.id('gifts') },
   handler: async (ctx, { token, studentId, giftId }) => {
-    await requireTeacher(ctx, token)
+    await requireStudentOwner(ctx, token, studentId)
 
     const gift = await ctx.db.get(giftId)
     if (!gift) throw new ConvexError("Sovg'a topilmadi")

@@ -5,7 +5,7 @@ import { mapId } from '@/shared/lib/convex/mapId'
 
 export function useLessonStore(selector) {
   const token = useAuthStore((s) => s.token)
-  const items = (useQuery(api.lessons.list) ?? []).map(mapId)
+  const items = (useQuery(api.lessons.list, token ? { token } : 'skip') ?? []).map(mapId)
   const saveSessionMutation = useMutation(api.lessons.saveSession)
   const removeCascadeMutation = useMutation(api.lessons.removeCascade)
 

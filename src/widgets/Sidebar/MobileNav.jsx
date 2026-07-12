@@ -19,13 +19,13 @@ export function MobileNav() {
           end={item.to === '/'}
           className={({ isActive }) =>
             cn(
-              'flex flex-1 flex-col items-center gap-0.5 px-0.5 py-2 text-[10px] font-medium transition-colors',
+              'flex flex-1 flex-col items-center gap-0.5 px-1 py-5 text-[10px] font-medium transition-colors',
               isActive ? 'text-primary' : 'text-muted-foreground',
             )
           }
         >
-          <item.icon className="size-5 shrink-0" />
-          <span className="w-full truncate text-center leading-tight">{item.label}</span>
+          <item.icon className="size-6 shrink-0" />
+          {/* <span className="w-full truncate text-center leading-tight">{item.label}</span> */}
         </NavLink>
       ))}
     </nav>

@@ -14,7 +14,15 @@ export const loginTeacher = action({
     }
     const token = generateToken()
     await ctx.runMutation(internal.auth.createSession, { token, role: 'teacher', userId: teacher._id })
-    return { ok: true, token, role: 'teacher', userId: teacher._id, fullName: teacher.fullName, username: teacher.username }
+    return {
+      ok: true,
+      token,
+      role: 'teacher',
+      userId: teacher._id,
+      fullName: teacher.fullName,
+      username: teacher.username,
+      isSuperAdmin: !!teacher.isSuperAdmin,
+    }
   },
 })
 

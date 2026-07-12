@@ -2,44 +2,57 @@ import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
 import { requireTeacher } from './lib/authz'
 
-const TABLES = ['coinEntries', 'transactions', 'lessons', 'students', 'groups', 'gifts']
+/** Gathers everything owned by one teacher (via groupId -> group.teacherId), regardless
+ * of whether the caller is a superadmin. Superadmin's global read access (groups/students/
+ * lessons/coinEntries/transactions `list`) is intentionally NOT reused here — export/reset/
+ * import are destructive personal-backup tools, and must never operate on another
+ * teacher's data even when the caller can otherwise see it all. */
+async function collectForTeacher(ctx, teacherId) {
+  const groups = (await ctx.db.query('groups').collect()).filter((g) => g.teacherId === teacherId)
+  const groupIdSet = new Set(groups.map((g) => g._id))
+  const students = (await ctx.db.query('students').collect()).filter((s) => groupIdSet.has(s.groupId))
+  const studentIdSet = new Set(students.map((s) => s._id))
+  const lessons = (await ctx.db.query('lessons').collect()).filter((l) => groupIdSet.has(l.groupId))
+  const coinEntries = (await ctx.db.query('coinEntries').collect()).filter((e) => studentIdSet.has(e.studentId))
+  const transactions = (await ctx.db.query('transactions').collect()).filter((t) => studentIdSet.has(t.studentId))
+  return { groups, students, lessons, coinEntries, transactions }
+}
 
 export const exportAll = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const session = await requireTeacher(ctx, token)
     const teacher = await ctx.db.get(session.userId)
+    const owned = await collectForTeacher(ctx, session.userId)
     return {
       exportedAt: new Date().toISOString(),
       teacher: teacher ? { username: teacher.username, passwordHash: teacher.passwordHash, fullName: teacher.fullName } : null,
-      groups: await ctx.db.query('groups').collect(),
-      students: await ctx.db.query('students').collect(),
-      lessons: await ctx.db.query('lessons').collect(),
-      coinEntries: await ctx.db.query('coinEntries').collect(),
-      transactions: await ctx.db.query('transactions').collect(),
+      ...owned,
       gifts: await ctx.db.query('gifts').collect(),
     }
   },
 })
 
-/** Wipes every group/student/lesson/coin record — used by Settings > "Ma'lumotlarni
- * tozalash". Teacher login and the gift catalog are left in place. */
+/** Wipes the caller's own groups/students/lessons/coin records — used by Settings >
+ * "Ma'lumotlarni tozalash". Teacher login and the (shared) gift catalog are left in place.
+ * Scoped to the caller's own data even for a superadmin, so this can never wipe another
+ * teacher's roster. */
 export const resetOperationalData = mutation({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    await requireTeacher(ctx, token)
-    for (const table of TABLES) {
-      if (table === 'gifts') continue
-      const rows = await ctx.db.query(table).collect()
-      for (const row of rows) await ctx.db.delete(row._id)
+    const session = await requireTeacher(ctx, token)
+    const owned = await collectForTeacher(ctx, session.userId)
+    for (const table of ['coinEntries', 'transactions', 'lessons', 'students', 'groups']) {
+      for (const row of owned[table]) await ctx.db.delete(row._id)
     }
   },
 })
 
-/** Wipes every group/student/lesson/coin/gift record and restores them from a previous
- * `exportAll` payload, remapping the old row ids to freshly-inserted ones. The teacher
- * account backing the current session is patched in place (never deleted) so the import
- * can't lock the caller out. */
+/** Wipes the caller's own groups/students/lessons/coin records and restores them from a
+ * previous `exportAll` payload, remapping the old row ids to freshly-inserted ones and
+ * re-attaching every new group to the caller. The teacher account backing the current
+ * session is patched in place (never deleted) so the import can't lock the caller out.
+ * The (shared) gift catalog is never touched by a personal import. */
 export const importAll = mutation({
   args: {
     token: v.string(),
@@ -50,15 +63,15 @@ export const importAll = mutation({
       lessons: v.array(v.any()),
       coinEntries: v.array(v.any()),
       transactions: v.array(v.any()),
-      gifts: v.array(v.any()),
+      gifts: v.optional(v.array(v.any())),
     }),
   },
   handler: async (ctx, { token, data }) => {
     const session = await requireTeacher(ctx, token)
 
-    for (const table of TABLES) {
-      const rows = await ctx.db.query(table).collect()
-      for (const row of rows) await ctx.db.delete(row._id)
+    const owned = await collectForTeacher(ctx, session.userId)
+    for (const table of ['coinEntries', 'transactions', 'lessons', 'students', 'groups']) {
+      for (const row of owned[table]) await ctx.db.delete(row._id)
     }
 
     if (data.teacher) {
@@ -71,7 +84,7 @@ export const importAll = mutation({
 
     const groupIdMap = new Map()
     for (const g of data.groups) {
-      const newId = await ctx.db.insert('groups', { name: g.name, createdAt: g.createdAt })
+      const newId = await ctx.db.insert('groups', { name: g.name, createdAt: g.createdAt, teacherId: session.userId })
       groupIdMap.set(g._id, newId)
     }
 
@@ -87,12 +100,6 @@ export const importAll = mutation({
         status: s.status,
       })
       studentIdMap.set(s._id, newId)
-    }
-
-    const giftIdMap = new Map()
-    for (const g of data.gifts) {
-      const newId = await ctx.db.insert('gifts', { name: g.name, icon: g.icon, price: g.price })
-      giftIdMap.set(g._id, newId)
     }
 
     const lessonIdMap = new Map()
@@ -125,7 +132,7 @@ export const importAll = mutation({
         type: t.type,
         amount: t.amount,
         relatedEntryId: t.relatedEntryId ? entryIdMap.get(t.relatedEntryId) : undefined,
-        relatedGiftId: t.relatedGiftId ? giftIdMap.get(t.relatedGiftId) : undefined,
+        relatedGiftId: t.relatedGiftId ?? undefined,
         timestamp: t.timestamp,
       })
     }

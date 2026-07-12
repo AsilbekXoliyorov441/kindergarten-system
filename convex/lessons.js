@@ -1,14 +1,16 @@
 import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
-import { requireTeacher } from './lib/authz'
+import { getScopedGroupIdSet, requireGroupOwner, requireLessonOwner } from './lib/scoping'
 import { COIN_CATEGORY_LIST, LESSONS_PER_MONTH } from '../src/shared/config/constants'
 
 const CATEGORY_MAX = Object.fromEntries(COIN_CATEGORY_LIST.map((c) => [c.key, c.max]))
 
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query('lessons').collect()
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const groupIdSet = await getScopedGroupIdSet(ctx, token)
+    const lessons = await ctx.db.query('lessons').collect()
+    return groupIdSet === null ? lessons : lessons.filter((l) => groupIdSet.has(l.groupId))
   },
 })
 
@@ -23,7 +25,7 @@ export const saveSession = mutation({
     date: v.string(),
   },
   handler: async (ctx, { token, groupId, scores, date }) => {
-    await requireTeacher(ctx, token)
+    await requireGroupOwner(ctx, token, groupId)
 
     const groupLessons = await ctx.db
       .query('lessons')
@@ -69,7 +71,7 @@ export const saveSession = mutation({
 export const removeCascade = mutation({
   args: { token: v.string(), ids: v.array(v.id('lessons')) },
   handler: async (ctx, { token, ids }) => {
-    await requireTeacher(ctx, token)
+    for (const id of ids) await requireLessonOwner(ctx, token, id)
     const lessonIdSet = new Set(ids)
 
     const allEntries = await ctx.db.query('coinEntries').collect()

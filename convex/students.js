@@ -1,6 +1,6 @@
 import { query, mutation, internalQuery, internalMutation } from './_generated/server'
 import { v } from 'convex/values'
-import { requireTeacher } from './lib/authz'
+import { getScopedGroupIdSet, requireStudentOwner } from './lib/scoping'
 
 function stripCredentials(student) {
   const rest = { ...student }
@@ -10,10 +10,12 @@ function stripCredentials(student) {
 }
 
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const groupIdSet = await getScopedGroupIdSet(ctx, token)
     const students = await ctx.db.query('students').collect()
-    return students.map(stripCredentials)
+    const scoped = groupIdSet === null ? students : students.filter((s) => groupIdSet.has(s.groupId))
+    return scoped.map(stripCredentials)
   },
 })
 
@@ -22,9 +24,10 @@ export const list = query({
 export const listForTeacher = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    await requireTeacher(ctx, token)
+    const groupIdSet = await getScopedGroupIdSet(ctx, token)
     const students = await ctx.db.query('students').collect()
-    return students.map((student) => {
+    const scoped = groupIdSet === null ? students : students.filter((s) => groupIdSet.has(s.groupId))
+    return scoped.map((student) => {
       const rest = { ...student }
       delete rest.passwordHash
       return rest
@@ -88,7 +91,7 @@ export const updatePasswordHash = internalMutation({
 export const updateStatus = mutation({
   args: { token: v.string(), id: v.id('students'), status: v.union(v.literal('active'), v.literal('removed')) },
   handler: async (ctx, { token, id, status }) => {
-    await requireTeacher(ctx, token)
+    await requireStudentOwner(ctx, token, id)
     await ctx.db.patch(id, { status })
   },
 })
