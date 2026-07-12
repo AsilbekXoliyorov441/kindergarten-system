@@ -9,6 +9,7 @@ import { AnimatedNumber } from '@/shared/ui/animated-number'
 import { EmptyState } from '@/shared/ui/empty-state'
 import { StudentAvatar } from '@/entities/student/ui/StudentAvatar'
 import { StudentCharts } from '@/widgets/StudentCharts/StudentCharts'
+import { StudentLessonProgress } from '@/widgets/StudentLessonProgress/StudentLessonProgress'
 import { StudentTimeline } from '@/widgets/StudentTimeline/StudentTimeline'
 import { GiftGrid } from '@/widgets/GiftGrid/GiftGrid'
 import { RedeemGiftDialog } from '@/features/redeem-gift/ui/RedeemGiftDialog'
@@ -103,6 +104,8 @@ export function StudentProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <StudentLessonProgress studentId={student.id} group={group} lessons={lessons} coinEntries={coinEntries} />
 
       <StudentCharts studentId={student.id} coinEntries={coinEntries} lessons={lessons} />
 

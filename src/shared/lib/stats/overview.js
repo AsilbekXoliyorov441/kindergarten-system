@@ -45,6 +45,48 @@ export function getGroupStats(group, students, lessons, coinEntries) {
   }
 }
 
+/** Lifetime lesson count and most recent lesson date for a student's group, for the
+ * lesson-progress widget's headline tiles. */
+export function getLessonProgress(group, lessons) {
+  const groupLessons = [...lessons.filter((l) => l.groupId === group?.id)].sort((a, b) => a.lessonNumber - b.lessonNumber)
+  const lastLesson = groupLessons[groupLessons.length - 1] ?? null
+
+  return {
+    totalLessons: groupLessons.length,
+    lastLessonDate: lastLesson?.date ?? null,
+  }
+}
+
+/** One student's coin growth across their group's lessons, in order — per-lesson coins
+ * earned and `growthPercent`: how much this lesson's coins rose or fell versus the
+ * previous lesson's (can be negative). Walks every lesson the group has held (not just
+ * ones with entries) so lessons where the student earned 0 still show up as a flat step,
+ * keeping the curve continuous.
+ * The very first lesson has no prior lesson to compare against, so `growthPercent` is
+ * null there; when the previous lesson was 0, a jump to any coins is treated as +100%
+ * rather than an undefined division. */
+export function getStudentCoinGrowth(studentId, group, lessons, coinEntries) {
+  const groupLessons = [...lessons.filter((l) => l.groupId === group?.id)].sort((a, b) => a.lessonNumber - b.lessonNumber)
+
+  const coinsByLesson = new Map()
+  coinEntries
+    .filter((e) => e.studentId === studentId)
+    .forEach((e) => coinsByLesson.set(e.lessonId, (coinsByLesson.get(e.lessonId) ?? 0) + e.value))
+
+  let previousCoins = null
+  return groupLessons.map((lesson) => {
+    const coins = coinsByLesson.get(lesson.id) ?? 0
+
+    let growthPercent = null
+    if (previousCoins !== null) {
+      growthPercent = previousCoins > 0 ? ((coins - previousCoins) / previousCoins) * 100 : coins > 0 ? 100 : 0
+    }
+    previousCoins = coins
+
+    return { lessonNumber: lesson.lessonNumber, date: lesson.date, coins, growthPercent }
+  })
+}
+
 /** Per-lesson coin totals for a trend chart, optionally scoped to one group. */
 export function getCoinTrend(lessons, coinEntries, { groupId } = {}) {
   const filteredLessons = [...lessons.filter((l) => (groupId ? l.groupId === groupId : true))].sort(
