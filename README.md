@@ -33,3 +33,4 @@ To start over with fresh demo data, log in as the teacher and use **Sozlamalar â
 - `yarn lint` â€” ESLint
 # edu-erp
 # lms-demo
+# lms-demo
