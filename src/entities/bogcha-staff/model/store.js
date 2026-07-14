@@ -12,13 +12,13 @@ export function useBogchaStaffStore(selector) {
   const isSuperAdmin = useBogchaAuthStore((s) => s.role) === BOGCHA_ROLES.SUPERADMIN
   const items = (useQuery(api.bogcha.staff.list, token && isSuperAdmin ? { token } : 'skip') ?? []).map(mapId)
   const createAction = useAction(api.bogcha.staffActions.create)
-  const resetPasswordAction = useAction(api.bogcha.staffActions.resetPassword)
+  const updateCredentialsAction = useAction(api.bogcha.staffActions.updateCredentials)
   const updateStatusMutation = useMutation(api.bogcha.staff.updateStatus)
 
   return selector({
     items,
     create: (fullName, role, phone) => createAction({ token, fullName, role, phone }),
-    resetPassword: (staffId) => resetPasswordAction({ token, staffId }),
+    updateCredentials: (staffId, username, password) => updateCredentialsAction({ token, staffId, username, password }),
     updateStatus: (id, status) => updateStatusMutation({ token, id, status }),
   })
 }

@@ -20,6 +20,8 @@ import type * as bogcha_groups from "../bogcha/groups.js";
 import type * as bogcha_lib_authz from "../bogcha/lib/authz.js";
 import type * as bogcha_lib_scoping from "../bogcha/lib/scoping.js";
 import type * as bogcha_messages from "../bogcha/messages.js";
+import type * as bogcha_parents from "../bogcha/parents.js";
+import type * as bogcha_parentsActions from "../bogcha/parentsActions.js";
 import type * as bogcha_settings from "../bogcha/settings.js";
 import type * as bogcha_staff from "../bogcha/staff.js";
 import type * as bogcha_staffActions from "../bogcha/staffActions.js";
@@ -58,6 +60,8 @@ declare const fullApi: ApiFromModules<{
   "bogcha/lib/authz": typeof bogcha_lib_authz;
   "bogcha/lib/scoping": typeof bogcha_lib_scoping;
   "bogcha/messages": typeof bogcha_messages;
+  "bogcha/parents": typeof bogcha_parents;
+  "bogcha/parentsActions": typeof bogcha_parentsActions;
   "bogcha/settings": typeof bogcha_settings;
   "bogcha/staff": typeof bogcha_staff;
   "bogcha/staffActions": typeof bogcha_staffActions;

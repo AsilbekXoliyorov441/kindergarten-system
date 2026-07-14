@@ -1,5 +1,5 @@
 import { query, mutation, internalQuery, internalMutation } from '../_generated/server'
-import { v } from 'convex/values'
+import { v, ConvexError } from 'convex/values'
 import { getScope, requireGroupAccess } from './lib/scoping'
 import { requireSuperAdmin } from './lib/authz'
 
@@ -37,12 +37,26 @@ export const listForGroup = query({
 })
 
 export const archive = mutation({
-  args: { token: v.string(), childId: v.id('bogchaChildren') },
-  handler: async (ctx, { token, childId }) => {
+  args: { token: v.string(), childId: v.id('bogchaChildren'), reason: v.string() },
+  handler: async (ctx, { token, childId, reason }) => {
+    const trimmed = reason.trim()
+    if (!trimmed) throw new ConvexError("O'chirish sababi ko'rsatilishi kerak")
+
     const child = await ctx.db.get(childId)
-    if (!child) throw new Error('Bola topilmadi')
+    if (!child) throw new ConvexError('Bola topilmadi')
     await requireGroupAccess(ctx, token, child.groupId)
-    await ctx.db.patch(childId, { status: 'archived' })
+    await ctx.db.patch(childId, { status: 'archived', archivedAt: new Date().toISOString(), archiveReason: trimmed })
+  },
+})
+
+/** Every child, active and archived — superadmin-only, used for the statistics page's
+ * enrollment/churn figures (which need archived rows too, unlike the scoped roster
+ * queries above that only ever return active children). */
+export const listAllForStats = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    await requireSuperAdmin(ctx, token)
+    return await ctx.db.query('bogchaChildren').collect()
   },
 })
 

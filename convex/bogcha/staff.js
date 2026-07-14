@@ -33,10 +33,28 @@ export const updateStatus = mutation({
   },
 })
 
-export const updatePasswordHash = internalMutation({
-  args: { id: v.id('bogchaStaff'), passwordHash: v.string() },
-  handler: async (ctx, { id, passwordHash }) => {
-    await ctx.db.patch(id, { passwordHash })
+export const updateCredentials = internalMutation({
+  args: {
+    id: v.id('bogchaStaff'),
+    username: v.optional(v.string()),
+    passwordHash: v.optional(v.string()),
+  },
+  handler: async (ctx, { id, username, passwordHash }) => {
+    const patch = {}
+    if (username !== undefined) patch.username = username
+    if (passwordHash !== undefined) patch.passwordHash = passwordHash
+    await ctx.db.patch(id, patch)
+  },
+})
+
+export const isUsernameTaken = internalQuery({
+  args: { username: v.string(), exceptStaffId: v.optional(v.id('bogchaStaff')) },
+  handler: async (ctx, { username, exceptStaffId }) => {
+    const existing = await ctx.db
+      .query('bogchaStaff')
+      .withIndex('by_username', (q) => q.eq('username', username))
+      .unique()
+    return !!existing && existing._id !== exceptStaffId
   },
 })
 
@@ -48,9 +66,3 @@ export const requireSuperAdminToken = internalQuery({
   },
 })
 
-export const getById = internalQuery({
-  args: { id: v.id('bogchaStaff') },
-  handler: async (ctx, { id }) => {
-    return await ctx.db.get(id)
-  },
-})

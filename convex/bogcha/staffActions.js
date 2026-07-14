@@ -27,16 +27,34 @@ export const create = action({
   },
 })
 
-export const resetPassword = action({
-  args: { token: v.string(), staffId: v.id('bogchaStaff') },
-  handler: async (ctx, { token, staffId }) => {
+/** Superadmin-only: sets a custom username and/or password for a staff (opa/superadmin)
+ * account — either field may be omitted to leave it unchanged. */
+export const updateCredentials = action({
+  args: {
+    token: v.string(),
+    staffId: v.id('bogchaStaff'),
+    username: v.optional(v.string()),
+    password: v.optional(v.string()),
+  },
+  handler: async (ctx, { token, staffId, username, password }) => {
     await ctx.runQuery(internal.bogcha.staff.requireSuperAdminToken, { token })
 
-    const staff = await ctx.runQuery(internal.bogcha.staff.getById, { id: staffId })
-    if (!staff) throw new Error('Xodim topilmadi')
+    const trimmedUsername = username?.trim()
+    if (trimmedUsername) {
+      const taken = await ctx.runQuery(internal.bogcha.staff.isUsernameTaken, {
+        username: trimmedUsername,
+        exceptStaffId: staffId,
+      })
+      if (taken) throw new Error("Bu login band")
+    }
 
-    const passwordHash = hashPassword(staff.username)
-    await ctx.runMutation(internal.bogcha.staff.updatePasswordHash, { id: staffId, passwordHash })
-    return { username: staff.username, password: staff.username }
+    const passwordHash = password?.trim() ? hashPassword(password.trim()) : undefined
+    await ctx.runMutation(internal.bogcha.staff.updateCredentials, {
+      id: staffId,
+      username: trimmedUsername || undefined,
+      passwordHash,
+    })
+
+    return { ok: true }
   },
 })

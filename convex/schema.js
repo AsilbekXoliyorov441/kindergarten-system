@@ -101,6 +101,8 @@ export default defineSchema({
     birthDate: v.optional(v.string()),
     joinedAt: v.string(),
     status: v.union(v.literal('active'), v.literal('archived')),
+    archivedAt: v.optional(v.string()),
+    archiveReason: v.optional(v.string()),
   }).index('by_group', ['groupId']),
 
   bogchaParents: defineTable({
