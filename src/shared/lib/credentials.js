@@ -8,9 +8,9 @@ function translit(str) {
     .replace(/[^a-z0-9]+/g, '')
 }
 
-export function generateStudentLogin(fullName, existingLogins = []) {
-  const [firstName = 'oquvchi'] = fullName.trim().split(/\s+/)
-  const base = translit(firstName) || 'oquvchi'
+export function generateLoginFromName(fullName, existingLogins = [], fallback = 'user') {
+  const [firstName = fallback] = fullName.trim().split(/\s+/)
+  const base = translit(firstName) || fallback
   let login = base
   let suffix = 1
   while (existingLogins.includes(login)) {
@@ -18,6 +18,10 @@ export function generateStudentLogin(fullName, existingLogins = []) {
     suffix += 1
   }
   return login
+}
+
+export function generateStudentLogin(fullName, existingLogins = []) {
+  return generateLoginFromName(fullName, existingLogins, 'oquvchi')
 }
 
 export function generateStudentPassword() {

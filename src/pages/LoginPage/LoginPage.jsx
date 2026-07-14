@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
-import { Coins } from 'lucide-react'
+import { Baby } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
-import { LoginForm } from '@/features/login-as-role/ui/LoginForm'
+import { BogchaLoginForm } from '@/features/bogcha-login/ui/BogchaLoginForm'
 
 export function LoginPage() {
   return (
@@ -29,13 +29,13 @@ export function LoginPage() {
         <Card className="border-border/50 shadow-xl">
           <CardHeader className="items-center text-center">
             <div className="mb-2 flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary-hover text-primary-foreground shadow-lg">
-              <Coins className="size-7" />
+              <Baby className="size-7" />
             </div>
-            <CardTitle className="text-2xl">Coin System</CardTitle>
-            <CardDescription>PDP Frontend guruhlari uchun mukofot tizimi</CardDescription>
+            <CardTitle className="text-2xl">Bogcha</CardTitle>
+            <CardDescription>Yoqlama va oylik hisobot tizimi</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <LoginForm />
+            <BogchaLoginForm />
           </CardContent>
         </Card>
       </motion.div>

@@ -1,20 +1,20 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
-import { ROUTES } from '@/shared/config/constants'
+import { BOGCHA_ROUTES } from '@/shared/config/bogcha'
 import { RequireAuth } from '@/app/router/RequireAuth'
-import { RequireTeacher } from '@/app/router/RequireTeacher'
+import { RequireStaff } from '@/app/router/RequireStaff'
 import { RequireSuperAdmin } from '@/app/router/RequireSuperAdmin'
 import { HomeRoute } from '@/app/router/HomeRoute'
 import { AppLayout } from '@/app/layout/AppLayout'
 import { LoginPage } from '@/pages/LoginPage/LoginPage'
-import { GroupsPage } from '@/pages/GroupsPage/GroupsPage'
-import { GroupDetailPage } from '@/pages/GroupDetailPage/GroupDetailPage'
-import { StudentProfilePage } from '@/pages/StudentProfilePage/StudentProfilePage'
-import { CoinMarketPage } from '@/pages/CoinMarketPage/CoinMarketPage'
-import { LeaderboardPage } from '@/pages/LeaderboardPage/LeaderboardPage'
-import { SettingsPage } from '@/pages/SettingsPage/SettingsPage'
-import { TeachersDashboardPage } from '@/pages/TeachersDashboardPage/TeachersDashboardPage'
-import { TeachersManagementPage } from '@/pages/TeachersManagementPage/TeachersManagementPage'
+import { BogchaGroupsPage } from '@/pages/BogchaGroupsPage/BogchaGroupsPage'
+import { BogchaGroupDetailPage } from '@/pages/BogchaGroupDetailPage/BogchaGroupDetailPage'
+import { BogchaStaffPage } from '@/pages/BogchaStaffPage/BogchaStaffPage'
+import { BogchaChildProfilePage } from '@/pages/BogchaChildProfilePage/BogchaChildProfilePage'
+import { BogchaSettingsPage } from '@/pages/BogchaSettingsPage/BogchaSettingsPage'
+import { BogchaThreadsPage } from '@/pages/BogchaThreadsPage/BogchaThreadsPage'
+import { BogchaCorrespondencePage } from '@/pages/BogchaCorrespondencePage/BogchaCorrespondencePage'
+import { BogchaStatisticsPage } from '@/pages/BogchaStatisticsPage/BogchaStatisticsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage/NotFoundPage'
 
 export function AppRouter() {
@@ -23,7 +23,7 @@ export function AppRouter() {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
-        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+        <Route path={BOGCHA_ROUTES.LOGIN} element={<LoginPage />} />
         <Route
           element={
             <RequireAuth>
@@ -35,43 +35,50 @@ export function AppRouter() {
           <Route
             path="guruhlar"
             element={
-              <RequireTeacher>
-                <GroupsPage />
-              </RequireTeacher>
+              <RequireSuperAdmin>
+                <BogchaGroupsPage />
+              </RequireSuperAdmin>
             }
           />
           <Route
             path="guruhlar/:groupId"
             element={
-              <RequireTeacher>
-                <GroupDetailPage />
-              </RequireTeacher>
+              <RequireStaff>
+                <BogchaGroupDetailPage />
+              </RequireStaff>
             }
           />
-          <Route path="oquvchi/:studentId" element={<StudentProfilePage />} />
-          <Route path="coin-market" element={<CoinMarketPage />} />
-          <Route path="reyting" element={<LeaderboardPage />} />
+          <Route path="bola/:childId" element={<BogchaChildProfilePage />} />
+          <Route
+            path="xodimlar"
+            element={
+              <RequireSuperAdmin>
+                <BogchaStaffPage />
+              </RequireSuperAdmin>
+            }
+          />
           <Route
             path="sozlamalar"
             element={
-              <RequireTeacher>
-                <SettingsPage />
-              </RequireTeacher>
+              <RequireSuperAdmin>
+                <BogchaSettingsPage />
+              </RequireSuperAdmin>
             }
           />
+          <Route path="murojaatlar" element={<BogchaThreadsPage />} />
           <Route
-            path="teachers-dashboard"
-            element={
-              <RequireTeacher>
-                <TeachersDashboardPage />
-              </RequireTeacher>
-            }
-          />
-          <Route
-            path="ustozlar"
+            path="yozishmalar"
             element={
               <RequireSuperAdmin>
-                <TeachersManagementPage />
+                <BogchaCorrespondencePage />
+              </RequireSuperAdmin>
+            }
+          />
+          <Route
+            path="statistika"
+            element={
+              <RequireSuperAdmin>
+                <BogchaStatisticsPage />
               </RequireSuperAdmin>
             }
           />

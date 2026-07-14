@@ -1,10 +1,12 @@
 import { Navigate } from 'react-router-dom'
-import { ROLES, ROUTES } from '@/shared/config/constants'
-import { useAuthStore } from '@/entities/session/model/store'
-import { DashboardPage } from '@/pages/DashboardPage/DashboardPage'
+import { BOGCHA_ROLES, BOGCHA_ROUTES } from '@/shared/config/bogcha'
+import { useBogchaAuthStore } from '@/entities/bogcha-session/model/store'
+import { BogchaDashboardPage } from '@/pages/BogchaDashboardPage/BogchaDashboardPage'
 
 export function HomeRoute() {
-  const role = useAuthStore((s) => s.role)
-  if (role === ROLES.STUDENT) return <Navigate to={ROUTES.LEADERBOARD} replace />
-  return <DashboardPage />
+  const role = useBogchaAuthStore((s) => s.role)
+  const childId = useBogchaAuthStore((s) => s.childId)
+
+  if (role === BOGCHA_ROLES.PARENT) return <Navigate to={BOGCHA_ROUTES.childProfile(childId)} replace />
+  return <BogchaDashboardPage />
 }

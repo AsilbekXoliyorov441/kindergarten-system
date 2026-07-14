@@ -1,11 +1,11 @@
 import { Navigate, useLocation } from 'react-router-dom'
-import { ROUTES } from '@/shared/config/constants'
-import { useAuthStore } from '@/entities/session/model/store'
+import { BOGCHA_ROUTES } from '@/shared/config/bogcha'
+import { useBogchaAuthStore } from '@/entities/bogcha-session/model/store'
 
 export function RequireAuth({ children }) {
-  const role = useAuthStore((s) => s.role)
+  const role = useBogchaAuthStore((s) => s.role)
   const location = useLocation()
 
-  if (!role) return <Navigate to={ROUTES.LOGIN} replace state={{ from: location }} />
+  if (!role) return <Navigate to={BOGCHA_ROUTES.LOGIN} replace state={{ from: location }} />
   return children
 }

@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ROUTES } from '@/shared/config/constants'
-import { useAuthStore } from '@/entities/session/model/store'
+import { BOGCHA_ROLES, BOGCHA_ROUTES } from '@/shared/config/bogcha'
+import { useBogchaAuthStore } from '@/entities/bogcha-session/model/store'
 
 export function RequireSuperAdmin({ children }) {
-  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin)
+  const role = useBogchaAuthStore((s) => s.role)
+  const isSuperAdmin = role === BOGCHA_ROLES.SUPERADMIN
 
   useEffect(() => {
     if (!isSuperAdmin) {
@@ -13,6 +14,6 @@ export function RequireSuperAdmin({ children }) {
     }
   }, [isSuperAdmin])
 
-  if (!isSuperAdmin) return <Navigate to={ROUTES.DASHBOARD} replace />
+  if (!isSuperAdmin) return <Navigate to={BOGCHA_ROUTES.DASHBOARD} replace />
   return children
 }

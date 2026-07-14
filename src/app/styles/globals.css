@@ -37,6 +37,12 @@
   --chart-3: #eda100;
   --chart-4: #008300;
   --chart-5: #4a3aa7;
+
+  /* Murojaat (feedback) categories — fixed reserved meaning, always paired with an
+     icon/label, validated as a 3-slot categorical set via validate_palette.js. */
+  --feedback-shikoyat: #dc4545;
+  --feedback-taklif: #0f9d68;
+  --feedback-maqtov: #2a78d6;
 }
 
 .dark {
@@ -72,6 +78,10 @@
   --chart-3: #c98500;
   --chart-4: #008300;
   --chart-5: #9085e9;
+
+  --feedback-shikoyat: #d64545;
+  --feedback-taklif: #199e70;
+  --feedback-maqtov: #3987e5;
 }
 
 @theme inline {
@@ -107,6 +117,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  --color-feedback-shikoyat: var(--feedback-shikoyat);
+  --color-feedback-taklif: var(--feedback-taklif);
+  --color-feedback-maqtov: var(--feedback-maqtov);
 
   --radius-sm: calc(var(--radius) - 0.5rem);
   --radius-md: calc(var(--radius) - 0.25rem);

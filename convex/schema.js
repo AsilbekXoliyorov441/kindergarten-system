@@ -70,4 +70,98 @@ export default defineSchema({
     userId: v.union(v.id('teachers'), v.id('students')),
     createdAt: v.number(),
   }).index('by_token', ['token']),
+
+  // --- Bogcha (kindergarten) module — fully separate from the coin-system tables above ---
+
+  bogchaStaff: defineTable({
+    username: v.string(),
+    passwordHash: v.string(),
+    fullName: v.string(),
+    role: v.union(v.literal('superadmin'), v.literal('opa')),
+    phone: v.optional(v.string()),
+    status: v.union(v.literal('active'), v.literal('archived')),
+  }).index('by_username', ['username']),
+
+  bogchaGroups: defineTable({
+    name: v.string(),
+    createdAt: v.string(),
+    status: v.union(v.literal('active'), v.literal('archived')),
+  }),
+
+  bogchaGroupStaff: defineTable({
+    groupId: v.id('bogchaGroups'),
+    staffId: v.id('bogchaStaff'),
+  })
+    .index('by_group', ['groupId'])
+    .index('by_staff', ['staffId']),
+
+  bogchaChildren: defineTable({
+    groupId: v.id('bogchaGroups'),
+    fullName: v.string(),
+    birthDate: v.optional(v.string()),
+    joinedAt: v.string(),
+    status: v.union(v.literal('active'), v.literal('archived')),
+  }).index('by_group', ['groupId']),
+
+  bogchaParents: defineTable({
+    childId: v.id('bogchaChildren'),
+    username: v.string(),
+    passwordHash: v.string(),
+    fullName: v.string(),
+    phone: v.optional(v.string()),
+  })
+    .index('by_username', ['username'])
+    .index('by_child', ['childId']),
+
+  bogchaAttendance: defineTable({
+    childId: v.id('bogchaChildren'),
+    groupId: v.id('bogchaGroups'),
+    date: v.string(), // YYYY-MM-DD
+    status: v.union(v.literal('present'), v.literal('absent')),
+    reason: v.optional(v.string()),
+    markedBy: v.id('bogchaStaff'),
+    markedAt: v.string(),
+  })
+    .index('by_child_date', ['childId', 'date'])
+    .index('by_group_date', ['groupId', 'date']),
+
+  bogchaSettings: defineTable({
+    feePerDay: v.number(),
+  }),
+
+  bogchaSessions: defineTable({
+    token: v.string(),
+    role: v.union(v.literal('superadmin'), v.literal('opa'), v.literal('parent')),
+    userId: v.union(v.id('bogchaStaff'), v.id('bogchaParents')),
+    createdAt: v.number(),
+  }).index('by_token', ['token']),
+
+  bogchaThreads: defineTable({
+    parentId: v.id('bogchaParents'),
+    childId: v.id('bogchaChildren'),
+    groupId: v.id('bogchaGroups'),
+    recipient: v.union(v.literal('opa'), v.literal('director')),
+    category: v.union(v.literal('shikoyat'), v.literal('taklif'), v.literal('maqtov')),
+    createdAt: v.string(),
+    lastMessageAt: v.string(),
+  })
+    .index('by_parent', ['parentId'])
+    .index('by_group_recipient', ['groupId', 'recipient'])
+    .index('by_recipient', ['recipient']),
+
+  bogchaMessages: defineTable({
+    threadId: v.id('bogchaThreads'),
+    senderRole: v.union(v.literal('parent'), v.literal('opa'), v.literal('superadmin')),
+    senderId: v.union(v.id('bogchaParents'), v.id('bogchaStaff')),
+    text: v.string(),
+    createdAt: v.string(),
+  }).index('by_thread', ['threadId']),
+
+  bogchaThreadReads: defineTable({
+    threadId: v.id('bogchaThreads'),
+    userId: v.union(v.id('bogchaParents'), v.id('bogchaStaff')),
+    lastReadAt: v.string(),
+  })
+    .index('by_thread_user', ['threadId', 'userId'])
+    .index('by_user', ['userId']),
 })

@@ -12,21 +12,29 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { useThemeStore } from '@/shared/lib/store/themeStore'
-import { useAuthStore } from '@/entities/session/model/store'
-import { ROLES, ROUTES } from '@/shared/config/constants'
+import { useBogchaAuthStore } from '@/entities/bogcha-session/model/store'
+import { BOGCHA_ROLES, BOGCHA_ROUTES } from '@/shared/config/bogcha'
 
 const PAGE_TITLES = {
-  [ROUTES.DASHBOARD]: 'Bosh sahifa',
-  [ROUTES.GROUPS]: 'Guruhlar',
-  [ROUTES.COIN_MARKET]: 'Coin Market',
-  [ROUTES.LEADERBOARD]: 'Reyting',
-  [ROUTES.SETTINGS]: 'Sozlamalar',
+  [BOGCHA_ROUTES.DASHBOARD]: 'Bosh sahifa',
+  [BOGCHA_ROUTES.GROUPS]: 'Guruhlar',
+  [BOGCHA_ROUTES.STAFF]: 'Bogcha opalar',
+  [BOGCHA_ROUTES.SETTINGS]: 'Sozlamalar',
+  [BOGCHA_ROUTES.THREADS]: 'Murojaatlar',
+  [BOGCHA_ROUTES.CORRESPONDENCE]: 'Yozishmalar',
+  [BOGCHA_ROUTES.STATISTICS]: 'Statistika',
+}
+
+const ROLE_LABELS = {
+  [BOGCHA_ROLES.SUPERADMIN]: 'Superadmin',
+  [BOGCHA_ROLES.OPA]: 'Bogcha opa',
+  [BOGCHA_ROLES.PARENT]: 'Ota-ona',
 }
 
 function resolveTitle(pathname) {
   if (pathname.startsWith('/guruhlar/')) return 'Guruh'
-  if (pathname.startsWith('/oquvchi/')) return "O'quvchi profili"
-  return PAGE_TITLES[pathname] ?? 'Coin System'
+  if (pathname.startsWith('/bola/')) return 'Bola profili'
+  return PAGE_TITLES[pathname] ?? 'Bogcha'
 }
 
 export function Header() {
@@ -34,9 +42,9 @@ export function Header() {
   const navigate = useNavigate()
   const theme = useThemeStore((s) => s.theme)
   const toggleTheme = useThemeStore((s) => s.toggleTheme)
-  const role = useAuthStore((s) => s.role)
-  const fullName = useAuthStore((s) => s.fullName)
-  const logout = useAuthStore((s) => s.logout)
+  const role = useBogchaAuthStore((s) => s.role)
+  const fullName = useBogchaAuthStore((s) => s.fullName)
+  const logout = useBogchaAuthStore((s) => s.logout)
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border/60 bg-background/70 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8">
@@ -79,15 +87,15 @@ export function Header() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel className="flex flex-col gap-1.5">
               <span className="text-foreground">{fullName}</span>
-              <Badge variant={role === ROLES.TEACHER ? 'default' : 'secondary'} className="w-fit">
-                {role === ROLES.TEACHER ? "O'qituvchi" : "O'quvchi"}
+              <Badge variant={role === BOGCHA_ROLES.SUPERADMIN ? 'default' : 'secondary'} className="w-fit">
+                {ROLE_LABELS[role]}
               </Badge>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
                 logout()
-                navigate(ROUTES.LOGIN, { replace: true })
+                navigate(BOGCHA_ROUTES.LOGIN, { replace: true })
               }}
               className="text-destructive focus:text-destructive"
             >

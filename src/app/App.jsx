@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { ConvexProvider } from 'convex/react'
-import { Coins } from 'lucide-react'
-import { useAuthStore } from '@/entities/session/model/store'
+import { Baby } from 'lucide-react'
+import { useBogchaAuthStore } from '@/entities/bogcha-session/model/store'
 import { useThemeStore } from '@/shared/lib/store/themeStore'
 import { convexClient } from '@/shared/lib/convex/client'
 import { Toaster } from '@/shared/ui/sonner'
@@ -14,7 +14,7 @@ function SplashScreen() {
     <div className="flex min-h-screen items-center justify-center bg-app-gradient bg-background">
       <div className="flex flex-col items-center gap-3">
         <div className="flex size-14 animate-pulse items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary-hover text-primary-foreground shadow-lg">
-          <Coins className="size-7" />
+          <Baby className="size-7" />
         </div>
         <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
       </div>
@@ -23,8 +23,8 @@ function SplashScreen() {
 }
 
 const App = () => {
-  const hydrated = useAuthStore((s) => s.hydrated)
-  const hydrateAuth = useAuthStore((s) => s.hydrate)
+  const hydrated = useBogchaAuthStore((s) => s.hydrated)
+  const hydrateAuth = useBogchaAuthStore((s) => s.hydrate)
   const theme = useThemeStore((s) => s.theme)
   const setTheme = useThemeStore((s) => s.setTheme)
 
