@@ -34,3 +34,4 @@ To start over with fresh demo data, log in as the teacher and use **Sozlamalar â
 # edu-erp
 # lms-demo
 # lms-demo
+# kindergarten-system
