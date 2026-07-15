@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { EmptyState } from '@/shared/ui/empty-state'
 import { CreateStaffDialog } from '@/features/bogcha-manage-staff/ui/CreateStaffDialog'
-import { ResetPasswordDialog } from '@/features/bogcha-manage-staff/ui/ResetPasswordDialog'
+import { EditStaffCredentialsDialog } from '@/features/bogcha-manage-staff/ui/EditStaffCredentialsDialog'
 import { ArchiveStaffDialog } from '@/features/bogcha-manage-staff/ui/ArchiveStaffDialog'
 import { useBogchaStaffStore } from '@/entities/bogcha-staff/model/store'
 import { useBogchaGroupStore } from '@/entities/bogcha-group/model/store'
@@ -69,7 +69,7 @@ export function BogchaStaffPage() {
                   )}
                 </CardContent>
                 <div className="absolute right-3 top-3 flex items-center gap-1">
-                  <ResetPasswordDialog staff={person} />
+                  <EditStaffCredentialsDialog staff={person} />
                   <ArchiveStaffDialog staff={person} />
                 </div>
               </Card>

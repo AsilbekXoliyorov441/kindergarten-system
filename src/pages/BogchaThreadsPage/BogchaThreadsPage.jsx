@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ArrowLeft, MessageCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowLeft, Baby, MessageCircle } from 'lucide-react'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { EmptyState } from '@/shared/ui/empty-state'
@@ -11,10 +12,11 @@ import { useMyThreads, useMyThreadReads } from '@/entities/bogcha-thread/model/s
 import { useBogchaChildStore } from '@/entities/bogcha-child/model/store'
 import { useBogchaGroupStore } from '@/entities/bogcha-group/model/store'
 import { useBogchaStaffStore } from '@/entities/bogcha-staff/model/store'
-import { BOGCHA_ROLES, FEEDBACK_RECIPIENT_LABELS } from '@/shared/config/bogcha'
+import { BOGCHA_ROLES, BOGCHA_ROUTES, FEEDBACK_RECIPIENT_LABELS } from '@/shared/config/bogcha'
 
 export function BogchaThreadsPage() {
   const role = useBogchaAuthStore((s) => s.role)
+  const childId = useBogchaAuthStore((s) => s.childId)
   const threads = useMyThreads()
   const reads = useMyThreadReads()
   const children = useBogchaChildStore((s) => s.items)
@@ -53,9 +55,16 @@ export function BogchaThreadsPage() {
   return (
     <div className="space-y-4">
       {role === BOGCHA_ROLES.PARENT && (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">{threads.length} ta murojaat</p>
-          <NewThreadDialog />
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" className="gap-1.5">
+              <Link to={BOGCHA_ROUTES.childProfile(childId)}>
+                <Baby className="size-4" /> Bolam profili
+              </Link>
+            </Button>
+            <NewThreadDialog />
+          </div>
         </div>
       )}
 

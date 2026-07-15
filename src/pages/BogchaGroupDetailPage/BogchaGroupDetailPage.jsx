@@ -10,9 +10,12 @@ import { AttendanceMonthGrid } from '@/widgets/AttendanceMonthGrid/AttendanceMon
 import { AddChildDialog } from '@/features/bogcha-manage-children/ui/AddChildDialog'
 import { ArchiveChildDialog } from '@/features/bogcha-manage-children/ui/ArchiveChildDialog'
 import { TransferChildDialog } from '@/features/bogcha-manage-children/ui/TransferChildDialog'
+import { EditParentDialog } from '@/features/bogcha-manage-children/ui/EditParentDialog'
+import { DeleteParentDialog } from '@/features/bogcha-manage-children/ui/DeleteParentDialog'
 import { useBogchaAuthStore } from '@/entities/bogcha-session/model/store'
 import { useBogchaGroupStore } from '@/entities/bogcha-group/model/store'
 import { useChildrenForGroup } from '@/entities/bogcha-child/model/store'
+import { useParentsForGroup } from '@/entities/bogcha-parent/model/store'
 import { getMonthKey } from '@/shared/lib/bogcha-date'
 import { BOGCHA_ROLES, BOGCHA_ROUTES } from '@/shared/config/bogcha'
 
@@ -25,6 +28,8 @@ export function BogchaGroupDetailPage() {
   const groups = useBogchaGroupStore((s) => s.items)
   const group = groups.find((g) => g.id === groupId)
   const children = useChildrenForGroup(groupId)
+  const parents = useParentsForGroup(groupId)
+  const parentByChildId = new Map(parents.map((p) => [p.childId, p]))
 
   if (!group) {
     return (
@@ -74,20 +79,28 @@ export function BogchaGroupDetailPage() {
           ) : (
             <Card>
               <CardContent className="divide-y divide-border/60 p-0">
-                {children.map((child) => (
-                  <div key={child.id} className="flex items-center justify-between gap-3 px-5 py-3">
-                    <Link to={BOGCHA_ROUTES.childProfile(child.id)} className="min-w-0 hover:text-primary">
-                      <p className="truncate font-medium text-foreground">{child.fullName}</p>
-                      {child.birthDate && <p className="text-xs text-muted-foreground">{child.birthDate}</p>}
-                    </Link>
-                    {isSuperAdmin && (
-                      <div className="flex shrink-0 items-center gap-1">
-                        <TransferChildDialog child={child} />
-                        <ArchiveChildDialog child={child} />
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {children.map((child) => {
+                  const parent = parentByChildId.get(child.id)
+                  return (
+                    <div key={child.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                      <Link to={BOGCHA_ROUTES.childProfile(child.id)} className="min-w-0 hover:text-primary">
+                        <p className="truncate font-medium text-foreground">{child.fullName}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {child.birthDate && `${child.birthDate} · `}
+                          {parent ? `${parent.fullName} (@${parent.username})` : 'Ota-ona biriktirilmagan'}
+                        </p>
+                      </Link>
+                      {isSuperAdmin && (
+                        <div className="flex shrink-0 items-center gap-1">
+                          {parent && <EditParentDialog parent={parent} />}
+                          {parent && <DeleteParentDialog parent={parent} />}
+                          <TransferChildDialog child={child} />
+                          <ArchiveChildDialog child={child} />
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </CardContent>
             </Card>
           )}
