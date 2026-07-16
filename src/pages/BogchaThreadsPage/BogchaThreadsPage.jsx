@@ -7,6 +7,7 @@ import { EmptyState } from '@/shared/ui/empty-state'
 import { ChatThread } from '@/features/bogcha-chat/ui/ChatThread'
 import { ThreadListItem } from '@/features/bogcha-chat/ui/ThreadListItem'
 import { NewThreadDialog } from '@/features/bogcha-send-feedback/ui/NewThreadDialog'
+import { DeleteThreadDialog } from '@/features/bogcha-chat/ui/DeleteThreadDialog'
 import { useBogchaAuthStore } from '@/entities/bogcha-session/model/store'
 import { useMyThreads, useMyThreadReads } from '@/entities/bogcha-thread/model/store'
 import { useBogchaChildStore } from '@/entities/bogcha-child/model/store'
@@ -106,12 +107,22 @@ export function BogchaThreadsPage() {
           <CardContent className="p-0">
             {selectedThreadId ? (
               <div>
-                <div className="flex items-center gap-2 border-b border-border/60 p-3 lg:hidden">
-                  <Button variant="ghost" size="icon" onClick={() => setSelectedThreadId(null)} aria-label="Orqaga">
-                    <ArrowLeft className="size-4" />
-                  </Button>
-                  <p className="text-sm font-medium text-foreground">Suhbat</p>
+                <div className="flex items-center justify-between gap-2 border-b border-border/60 p-3 lg:hidden">
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedThreadId(null)} aria-label="Orqaga">
+                      <ArrowLeft className="size-4" />
+                    </Button>
+                    <p className="text-sm font-medium text-foreground">Suhbat</p>
+                  </div>
+                  {role === BOGCHA_ROLES.SUPERADMIN && (
+                    <DeleteThreadDialog threadId={selectedThreadId} onDeleted={() => setSelectedThreadId(null)} />
+                  )}
                 </div>
+                {role === BOGCHA_ROLES.SUPERADMIN && (
+                  <div className="hidden items-center justify-end border-b border-border/60 p-2 lg:flex">
+                    <DeleteThreadDialog threadId={selectedThreadId} onDeleted={() => setSelectedThreadId(null)} />
+                  </div>
+                )}
                 <ChatThread threadId={selectedThreadId} />
               </div>
             ) : (

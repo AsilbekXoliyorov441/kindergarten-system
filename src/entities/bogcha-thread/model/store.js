@@ -57,6 +57,12 @@ export function useMarkThreadRead() {
   return (threadId) => markMutation({ token, threadId })
 }
 
+export function useDeleteThread() {
+  const token = useBogchaAuthStore((s) => s.token)
+  const deleteMutation = useMutation(api.bogcha.threads.deleteThread)
+  return (threadId) => deleteMutation({ token, threadId })
+}
+
 /** All read-receipts belonging to the current user, for computing unread counts
  * client-side against each thread's `lastMessageAt` — same "raw data in, derive in the
  * client" convention as the attendance stats. */

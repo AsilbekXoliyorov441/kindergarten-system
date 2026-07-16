@@ -76,6 +76,31 @@ export const listAll = query({
   },
 })
 
+/** Superadmin-only: removes a murojaat/shikoyat thread entirely, along with its
+ * messages and read-receipts (Convex doesn't cascade-delete on its own). */
+export const deleteThread = mutation({
+  args: { token: v.string(), threadId: v.id('bogchaThreads') },
+  handler: async (ctx, { token, threadId }) => {
+    await requireSuperAdmin(ctx, token)
+    const thread = await ctx.db.get(threadId)
+    if (!thread) throw new ConvexError('Murojaat topilmadi')
+
+    const messages = await ctx.db
+      .query('bogchaMessages')
+      .withIndex('by_thread', (q) => q.eq('threadId', threadId))
+      .collect()
+    await Promise.all(messages.map((m) => ctx.db.delete(m._id)))
+
+    const reads = await ctx.db
+      .query('bogchaThreadReads')
+      .withIndex('by_thread_user', (q) => q.eq('threadId', threadId))
+      .collect()
+    await Promise.all(reads.map((r) => ctx.db.delete(r._id)))
+
+    await ctx.db.delete(threadId)
+  },
+})
+
 export const markRead = mutation({
   args: { token: v.string(), threadId: v.id('bogchaThreads') },
   handler: async (ctx, { token, threadId }) => {
