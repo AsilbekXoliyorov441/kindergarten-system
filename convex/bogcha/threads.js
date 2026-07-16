@@ -1,7 +1,7 @@
 import { query, mutation } from '../_generated/server'
 import { v, ConvexError } from 'convex/values'
 import { getScope, getScopedGroupIdSet, requireThreadAccess } from './lib/scoping'
-import { requireSuperAdmin } from './lib/authz'
+import { requireSuperAdmin, requireStaff } from './lib/authz'
 
 export const createThread = mutation({
   args: {
@@ -58,6 +58,7 @@ export const listForParent = query({
 export const listForOpa = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
+    await requireStaff(ctx, token)
     const groupIdSet = await getScopedGroupIdSet(ctx, token)
     const threads = await ctx.db
       .query('bogchaThreads')

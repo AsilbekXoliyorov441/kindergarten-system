@@ -38,7 +38,7 @@ export function BogchaGroupsPage() {
             const assignedStaff = staffLinks
               .filter((l) => l.groupId === group.id)
               .map((l) => staffById.get(l.staffId))
-              .filter(Boolean)
+              .filter((person) => person && person.status === 'active')
 
             return (
               <Card key={group.id} className="relative h-full">

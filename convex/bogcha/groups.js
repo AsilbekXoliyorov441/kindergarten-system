@@ -1,5 +1,5 @@
 import { query, mutation, internalQuery } from '../_generated/server'
-import { v } from 'convex/values'
+import { v, ConvexError } from 'convex/values'
 import { getScopedGroupIdSet, requireGroupAccess } from './lib/scoping'
 import { requireSuperAdmin } from './lib/authz'
 
@@ -27,7 +27,9 @@ export const create = mutation({
   args: { token: v.string(), name: v.string() },
   handler: async (ctx, { token, name }) => {
     await requireSuperAdmin(ctx, token)
-    return await ctx.db.insert('bogchaGroups', { name, createdAt: new Date().toISOString(), status: 'active' })
+    const trimmed = name.trim()
+    if (!trimmed) throw new ConvexError("Guruh nomi bo'sh bo'lishi mumkin emas")
+    return await ctx.db.insert('bogchaGroups', { name: trimmed, createdAt: new Date().toISOString(), status: 'active' })
   },
 })
 
@@ -35,7 +37,9 @@ export const rename = mutation({
   args: { token: v.string(), id: v.id('bogchaGroups'), name: v.string() },
   handler: async (ctx, { token, id, name }) => {
     await requireSuperAdmin(ctx, token)
-    await ctx.db.patch(id, { name })
+    const trimmed = name.trim()
+    if (!trimmed) throw new ConvexError("Guruh nomi bo'sh bo'lishi mumkin emas")
+    await ctx.db.patch(id, { name: trimmed })
   },
 })
 
@@ -43,6 +47,13 @@ export const archive = mutation({
   args: { token: v.string(), id: v.id('bogchaGroups') },
   handler: async (ctx, { token, id }) => {
     await requireSuperAdmin(ctx, token)
+    const children = await ctx.db
+      .query('bogchaChildren')
+      .withIndex('by_group', (q) => q.eq('groupId', id))
+      .collect()
+    if (children.some((c) => c.status === 'active')) {
+      throw new ConvexError("Bu guruhda faol bolalar bor — avval ularni boshqa guruhga o'tkazing")
+    }
     await ctx.db.patch(id, { status: 'archived' })
   },
 })

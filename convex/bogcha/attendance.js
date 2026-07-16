@@ -1,6 +1,7 @@
 import { query, mutation } from '../_generated/server'
 import { v, ConvexError } from 'convex/values'
 import { getScopedGroupIdSet, requireGroupAccess, requireChildAccess, requireStaffChildAccess } from './lib/scoping'
+import { requireStaff } from './lib/authz'
 
 function monthRange(monthKey) {
   return { start: `${monthKey}-01`, end: `${monthKey}-31` }
@@ -52,6 +53,7 @@ export const listForChildMonth = query({
 export const listForMonth = query({
   args: { token: v.string(), monthKey: v.string() },
   handler: async (ctx, { token, monthKey }) => {
+    await requireStaff(ctx, token)
     const groupIdSet = await getScopedGroupIdSet(ctx, token)
     const all = await ctx.db.query('bogchaAttendance').collect()
     const inMonth = all.filter((a) => a.date.startsWith(monthKey))

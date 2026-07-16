@@ -20,11 +20,11 @@ export const updateCredentials = action({
 
     const trimmedUsername = username?.trim()
     if (trimmedUsername) {
-      const taken = await ctx.runQuery(internal.bogcha.parents.isUsernameTaken, {
-        username: trimmedUsername,
-        exceptParentId: parentId,
-      })
-      if (taken) throw new Error("Bu login band")
+      const [takenByParent, takenByStaff] = await Promise.all([
+        ctx.runQuery(internal.bogcha.parents.isUsernameTaken, { username: trimmedUsername, exceptParentId: parentId }),
+        ctx.runQuery(internal.bogcha.staff.isUsernameTaken, { username: trimmedUsername }),
+      ])
+      if (takenByParent || takenByStaff) throw new Error("Bu login band")
     }
 
     const passwordHash = password?.trim() ? hashPassword(password.trim()) : undefined

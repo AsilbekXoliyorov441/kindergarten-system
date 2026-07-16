@@ -36,9 +36,12 @@ export function ChatThread({ threadId, readOnly = false }) {
   const bottomRef = useRef(null)
 
   useEffect(() => {
+    // Re-marks read whenever a new message arrives on the thread that's already open
+    // (not just when switching threads), so the unread badge doesn't stay lit while
+    // the conversation is being actively viewed.
     if (threadId) markRead(threadId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadId])
+  }, [threadId, messages.length])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' })

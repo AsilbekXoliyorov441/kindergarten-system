@@ -8,9 +8,6 @@
  * @module
  */
 
-import type * as auth from "../auth.js";
-import type * as authActions from "../authActions.js";
-import type * as backup from "../backup.js";
 import type * as bogcha_attendance from "../bogcha/attendance.js";
 import type * as bogcha_auth from "../bogcha/auth.js";
 import type * as bogcha_authActions from "../bogcha/authActions.js";
@@ -26,20 +23,9 @@ import type * as bogcha_settings from "../bogcha/settings.js";
 import type * as bogcha_staff from "../bogcha/staff.js";
 import type * as bogcha_staffActions from "../bogcha/staffActions.js";
 import type * as bogcha_threads from "../bogcha/threads.js";
-import type * as coinEntries from "../coinEntries.js";
-import type * as gifts from "../gifts.js";
-import type * as groups from "../groups.js";
-import type * as lessons from "../lessons.js";
 import type * as lib_authz from "../lib/authz.js";
 import type * as lib_passwords from "../lib/passwords.js";
 import type * as lib_scoping from "../lib/scoping.js";
-import type * as migrations from "../migrations.js";
-import type * as seedDemoActions from "../seedDemoActions.js";
-import type * as students from "../students.js";
-import type * as studentsActions from "../studentsActions.js";
-import type * as teachers from "../teachers.js";
-import type * as teachersActions from "../teachersActions.js";
-import type * as transactions from "../transactions.js";
 
 import type {
   ApiFromModules,
@@ -48,9 +34,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  auth: typeof auth;
-  authActions: typeof authActions;
-  backup: typeof backup;
   "bogcha/attendance": typeof bogcha_attendance;
   "bogcha/auth": typeof bogcha_auth;
   "bogcha/authActions": typeof bogcha_authActions;
@@ -66,20 +49,9 @@ declare const fullApi: ApiFromModules<{
   "bogcha/staff": typeof bogcha_staff;
   "bogcha/staffActions": typeof bogcha_staffActions;
   "bogcha/threads": typeof bogcha_threads;
-  coinEntries: typeof coinEntries;
-  gifts: typeof gifts;
-  groups: typeof groups;
-  lessons: typeof lessons;
   "lib/authz": typeof lib_authz;
   "lib/passwords": typeof lib_passwords;
   "lib/scoping": typeof lib_scoping;
-  migrations: typeof migrations;
-  seedDemoActions: typeof seedDemoActions;
-  students: typeof students;
-  studentsActions: typeof studentsActions;
-  teachers: typeof teachers;
-  teachersActions: typeof teachersActions;
-  transactions: typeof transactions;
 }>;
 
 /**

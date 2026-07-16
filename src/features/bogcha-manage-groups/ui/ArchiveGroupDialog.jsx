@@ -22,11 +22,15 @@ export function ArchiveGroupDialog({ group, redirectAfter = false }) {
   const archiveGroup = useBogchaGroupStore((s) => s.archive)
   const navigate = useNavigate()
 
-  const handleArchive = () => {
-    archiveGroup(group.id)
-    toast.success(`"${group.name}" guruhi arxivlandi`)
-    setOpen(false)
-    if (redirectAfter) navigate(BOGCHA_ROUTES.GROUPS, { replace: true })
+  const handleArchive = async () => {
+    try {
+      await archiveGroup(group.id)
+      toast.success(`"${group.name}" guruhi arxivlandi`)
+      setOpen(false)
+      if (redirectAfter) navigate(BOGCHA_ROUTES.GROUPS, { replace: true })
+    } catch (error) {
+      toast.error(error?.data ?? error?.message ?? "Guruhni arxivlashda xatolik yuz berdi")
+    }
   }
 
   return (

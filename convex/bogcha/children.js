@@ -87,6 +87,15 @@ export const insertChildWithParent = internalMutation({
     parentPhone: v.optional(v.string()),
   },
   handler: async (ctx, { groupId, fullName, birthDate, parentFullName, parentUsername, parentPasswordHash, parentPhone }) => {
+    // Re-check uniqueness (against both parents and staff) inside the mutation itself —
+    // Convex mutations are serialized, so this is the one place that's actually race-free,
+    // unlike the pre-check the calling action already did against a possibly-stale read.
+    const [parentClash, staffClash] = await Promise.all([
+      ctx.db.query('bogchaParents').withIndex('by_username', (q) => q.eq('username', parentUsername)).unique(),
+      ctx.db.query('bogchaStaff').withIndex('by_username', (q) => q.eq('username', parentUsername)).unique(),
+    ])
+    if (parentClash || staffClash) throw new ConvexError('Bu login band, qaytadan urinib ko\'ring')
+
     const childId = await ctx.db.insert('bogchaChildren', {
       groupId,
       fullName,

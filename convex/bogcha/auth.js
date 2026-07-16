@@ -1,5 +1,5 @@
 import { query, mutation, internalQuery, internalMutation } from '../_generated/server'
-import { v } from 'convex/values'
+import { v, ConvexError } from 'convex/values'
 import { resolveSession } from './lib/authz'
 
 export const getStaffByUsername = internalQuery({
@@ -31,6 +31,15 @@ export const insertStaff = internalMutation({
     phone: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Re-check uniqueness (against both staff and parents) inside the mutation itself —
+    // Convex mutations are serialized, so this is the one place that's actually race-free,
+    // unlike the pre-check the calling action already did against a possibly-stale read.
+    const [staffClash, parentClash] = await Promise.all([
+      ctx.db.query('bogchaStaff').withIndex('by_username', (q) => q.eq('username', args.username)).unique(),
+      ctx.db.query('bogchaParents').withIndex('by_username', (q) => q.eq('username', args.username)).unique(),
+    ])
+    if (staffClash || parentClash) throw new ConvexError('Bu login band')
+
     return await ctx.db.insert('bogchaStaff', { ...args, status: 'active' })
   },
 })
