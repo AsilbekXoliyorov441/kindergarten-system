@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Wallet } from 'lucide-react'
+import { Wallet, RefreshCcw } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Button } from '@/shared/ui/button'
 import { useBogchaSettingsStore } from '@/entities/bogcha-settings/model/store'
+import { ResetDataDialog } from '@/features/bogcha-reset-data/ui/ResetDataDialog'
 
 function FeeForm({ feePerDay, onSave }) {
   const [value, setValue] = useState(String(feePerDay))
@@ -37,7 +38,7 @@ export function BogchaSettingsPage() {
   const update = useBogchaSettingsStore((s) => s.update)
 
   return (
-    <div className="max-w-md">
+    <div className="max-w-md space-y-6">
       <Card>
         <CardHeader>
           <div className="mb-1 flex size-11 items-center justify-center rounded-2xl bg-secondary text-primary">
@@ -50,6 +51,22 @@ export function BogchaSettingsPage() {
           {/* Keyed by feePerDay so the field re-initializes once the server value loads,
               without syncing external state into local state via an effect. */}
           <FeeForm key={feePerDay} feePerDay={feePerDay} onSave={update} />
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <div className="mb-1 flex size-11 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+            <RefreshCcw className="size-5" />
+          </div>
+          <CardTitle>Ma'lumotlarni tozalash</CardTitle>
+          <CardDescription>
+            Guruhlar, bolalar, ota-onalar, davomat va murojaatlarni butunlay o'chiradi. Xodimlar login-parollari
+            saqlanib qoladi.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResetDataDialog />
         </CardContent>
       </Card>
     </div>

@@ -66,3 +66,14 @@ export const requireSuperAdminToken = internalQuery({
   },
 })
 
+/** Used from Node actions to re-verify the caller's own password before a destructive
+ * action (full data reset) — returns the full staff row, including passwordHash, for an
+ * internal-only comparison. Never exposed to the client. */
+export const getSuperAdminForToken = internalQuery({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await requireSuperAdmin(ctx, token)
+    return await ctx.db.get(session.userId)
+  },
+})
+

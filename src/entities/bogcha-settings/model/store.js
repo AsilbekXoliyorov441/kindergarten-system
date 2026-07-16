@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from 'convex/react'
+import { useQuery, useMutation, useAction } from 'convex/react'
 import { api } from '@convex/_generated/api'
 import { useBogchaAuthStore } from '@/entities/bogcha-session/model/store'
 import { DEFAULT_FEE_PER_DAY } from '@/shared/config/bogcha'
@@ -12,4 +12,12 @@ export function useBogchaSettingsStore(selector) {
     feePerDay: settings?.feePerDay ?? DEFAULT_FEE_PER_DAY,
     update: (feePerDay) => updateMutation({ token, feePerDay }),
   })
+}
+
+/** Wipes all groups/children/parents/attendance/threads — re-verifies the caller's own
+ * username+password (see convex/bogcha/resetActions.js) before the server touches anything. */
+export function useResetAllData() {
+  const token = useBogchaAuthStore((s) => s.token)
+  const resetAction = useAction(api.bogcha.resetActions.resetAllData)
+  return (username, password) => resetAction({ token, username, password })
 }
